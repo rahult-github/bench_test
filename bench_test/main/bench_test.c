@@ -58,6 +58,9 @@ static void producer_semaphore(void *arg)
     vTaskDelete(NULL);
 }
 
+// ================================================================
+// NOTIFY BENCH
+// ================================================================
 static void consumer_notify(void *arg)
 {
     uint64_t total_cycles = 0;
@@ -109,7 +112,13 @@ void app_main(void)
 #if 1
     test_sem = xSemaphoreCreateBinary();
     xTaskCreatePinnedToCore(consumer_semaphore, "cons_sem", 4096, NULL, 5, &consumer_task, 0);
+
+#if (CONFIG_IDF_TARGET_ESP32 == 1)
     xTaskCreatePinnedToCore(producer_semaphore, "prod_sem", 4096, NULL, 5, NULL, 1);
+#else
+    xTaskCreatePinnedToCore(producer_semaphore, "prod_sem", 4096, NULL, 5, NULL, 0);
+#endif
+
 #endif
 
 // Wait for notify benchmark to finish
